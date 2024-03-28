@@ -1,0 +1,39 @@
+package python
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+)
+
+var _ provider.Provider = (*pythonPackageProvider)(nil)
+
+func New() func() provider.Provider {
+	return func() provider.Provider {
+		return &pythonPackageProvider{}
+	}
+}
+
+type pythonPackageProvider struct{}
+
+func (p *pythonPackageProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+
+}
+
+func (p *pythonPackageProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+
+}
+
+func (p *pythonPackageProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "python_package"
+}
+
+func (p *pythonPackageProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{}
+}
+
+func (p *pythonPackageProvider) Resources(ctx context.Context) []func() resource.Resource {
+	return []func() resource.Resource{}
+}
