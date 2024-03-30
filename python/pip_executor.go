@@ -4,52 +4,36 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"io"
 	"os/exec"
-	"strings"
 )
 
 type PipExecutor struct {
-	command    string
-	extraFlags string
+	command      string
+	requirements string
+	installPath  string
+	extraFlags   []string
 }
 
-func NewPipExecutor(command string, extraFlags string) PipExecutor {
+func NewPipExecutor(command string, requirements string, installPath string, extraFlags []string) PipExecutor {
 	return PipExecutor{
-		command:    command,
-		extraFlags: extraFlags,
+		command:      command,
+		requirements: requirements,
+		installPath:  installPath,
+		extraFlags:   extraFlags,
 	}
 }
 
 func (p PipExecutor) Execute(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, p.command, "install", "--help")
-	fmt.Printf("executing command: %s\n", cmd.String())
+	cmd := exec.CommandContext(ctx,
+		p.command,
+		"install", "-r", p.requirements,
+		"-t", p.installPath)
+
 	tflog.Debug(ctx, "Executing command", map[string]interface{}{
 		"command": cmd.String(),
 	})
 
-	var out strings.Builder
-	cmd.Stdout = &out
-
-	//stdoutPipe, err := cmd.StdoutPipe()
-	//if err != nil {
-	//	tflog.Error(ctx, "unable to get command stdout", map[string]interface{}{
-	//		"error": err,
-	//	})
-	//	return err
-	//}
-
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		tflog.Error(ctx, "unable to get command stderr", map[string]interface{}{
-			"error": err,
-		})
-		return err
-	}
-
-	//defer logOutput(ctx, stdoutPipe, stdErrPipe)
-
-	err = cmd.Run()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
 		tflog.Error(ctx, "error when running command", map[string]interface{}{
 			"command": cmd.String(),
@@ -57,30 +41,12 @@ func (p PipExecutor) Execute(ctx context.Context) error {
 		})
 		return err
 	}
-	cmd.Wait()
 
-	//stdout, _ := io.ReadAll(stdoutPipe)
-	stderr, _ := io.ReadAll(stderrPipe)
+	tflog.Debug(ctx, "output from running command", map[string]interface{}{
+		"command": cmd.String(),
+		"output":  output,
+	})
 
-	fmt.Printf("error: %s\n", stderr)
-	fmt.Printf("output: %s\n", out.String())
-
+	fmt.Printf("output: %s\n", output)
 	return nil
-}
-
-func logOutput(ctx context.Context, stdoutPipe io.ReadCloser, stderrPipe io.ReadCloser) func() {
-	return func() {
-		defer stdoutPipe.Close()
-		defer stderrPipe.Close()
-
-		stdout, _ := io.ReadAll(stdoutPipe)
-		stderr, _ := io.ReadAll(stderrPipe)
-
-		fmt.Printf("error: %s\n", stderr)
-		fmt.Printf("output: %s\n", stdout)
-		tflog.Debug(ctx, "command output", map[string]interface{}{
-			"stdout": stdout,
-			"stderr": stderr,
-		})
-	}
 }
