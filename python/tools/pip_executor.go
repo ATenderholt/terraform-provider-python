@@ -2,8 +2,6 @@ package tools
 
 import (
 	"context"
-	"fmt"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"os/exec"
 )
 
@@ -29,24 +27,23 @@ func (p PipExecutor) Execute(ctx context.Context) error {
 		"install", "-r", p.requirements,
 		"-t", p.installPath)
 
-	tflog.Debug(ctx, "Executing command", map[string]interface{}{
+	LogDebug(ctx, "Executing command", map[string]interface{}{
 		"command": cmd.String(),
 	})
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		tflog.Error(ctx, "error when running command", map[string]interface{}{
+		LogError(ctx, "error when running command", map[string]interface{}{
 			"command": cmd.String(),
 			"error":   err,
 		})
 		return err
 	}
 
-	tflog.Debug(ctx, "output from running command", map[string]interface{}{
+	LogDebug(ctx, "output from running command", map[string]interface{}{
 		"command": cmd.String(),
-		"output":  output,
+		"output":  string(output),
 	})
 
-	fmt.Printf("output: %s\n", output)
 	return nil
 }
