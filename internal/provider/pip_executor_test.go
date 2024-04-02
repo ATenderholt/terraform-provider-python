@@ -1,0 +1,25 @@
+package provider_test
+
+import (
+	"context"
+	"github.com/ATenderholt/terraform-provider-python-package/internal/provider"
+	"github.com/stretchr/testify/assert"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+func TestPipExecutor_Execute(t *testing.T) {
+	td := os.TempDir()
+	output := filepath.Join(td, "pip_output")
+	t.Logf("Using pip to install to %s", output)
+
+	pip := provider.NewPipExecutor("pip3",
+		"./test-fixtures/requirements.txt", output,
+		[]string{})
+	err := pip.Execute(context.TODO())
+
+	assert.NoError(t, err, "unexpected error when running pip")
+	assert.FileExists(t, filepath.Join(output, "dataclasses_avroschema", "__init__.py"))
+	assert.FileExists(t, filepath.Join(output, "fastavro", "__init__.py"))
+}
