@@ -1,8 +1,8 @@
-package provider_test
+package python_test
 
 import (
 	"context"
-	"github.com/ATenderholt/terraform-provider-python-package/internal/provider"
+	"github.com/ATenderholt/terraform-provider-python-package/internal/python"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
@@ -14,7 +14,7 @@ func TestPipExecutor_Execute(t *testing.T) {
 	output := filepath.Join(td, "pip_output")
 	t.Logf("Using pip to install to %s", output)
 
-	pip := provider.NewPipExecutor("pip3",
+	pip := python.NewPipExecutor("pip3",
 		"./test-fixtures/requirements.txt", output,
 		[]string{})
 	err := pip.Execute(context.TODO())
