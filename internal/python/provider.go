@@ -60,7 +60,7 @@ func (p *pythonPackageProvider) Configure(ctx context.Context, req provider.Conf
 }
 
 func (p *pythonPackageProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "python_package"
+	resp.TypeName = "python"
 }
 
 func (p *pythonPackageProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
