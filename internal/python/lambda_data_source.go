@@ -17,7 +17,10 @@ func NewAwsLambdaDataSource() datasource.DataSource {
 type awsLambdaDataSource struct{}
 
 type awsLambdaDataSourceModel struct {
-	Id types.String `tfsdk:"id"`
+	Id                 types.String `tfsdk:"id"`
+	SourceDir          types.String `tfsdk:"source_dir"`
+	OutputPath         types.String `tfsdk:"output_path"`
+	OutputBase64Sha256 types.String `tfsdk:"output_base64sha256"`
 }
 
 func (d *awsLambdaDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -29,6 +32,20 @@ func (d *awsLambdaDataSource) Schema(ctx context.Context, req datasource.SchemaR
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
+			},
+			"source_dir": schema.StringAttribute{
+				Description:         "Directory containing Python code, including requirements.txt to install dependencies",
+				MarkdownDescription: "Directory containing Python code, including requirements.txt to install dependencies",
+				Required:            true,
+			},
+			"output_path": schema.StringAttribute{
+				Description:         "Path for resulting ZIP file containing Python code and its dependencies",
+				MarkdownDescription: "Path for resulting ZIP file containing Python code and its dependencies",
+				Required:            true,
+			},
+			"output_base64sha256": schema.StringAttribute{
+				Description: "Base64 Encoded SHA256 checksum of output file",
+				Computed:    true,
 			},
 		},
 	}

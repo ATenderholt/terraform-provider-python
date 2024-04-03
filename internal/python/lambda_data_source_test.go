@@ -27,5 +27,8 @@ provider "python" {
   pip_command = "pip3.10"
 }
 
-data "python_aws_lambda" "test" {}
+data "python_aws_lambda" "test" {
+  source_dir  = ""
+  output_path = ""
+}
 `
