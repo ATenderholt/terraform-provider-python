@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -91,7 +92,7 @@ func Checksum(path string) (string, error) {
 	}
 	defer f.Close()
 
-	hasher := md5.New()
+	hasher := sha256.New()
 	_, err = io.Copy(hasher, f)
 	if err != nil {
 		return "", fmt.Errorf("unable to checksum file=%s: %v", path, err)
