@@ -15,7 +15,7 @@ func TestPipExecutor_Execute(t *testing.T) {
 	t.Logf("Using pip to install to %s", output)
 
 	pip := python.NewPipExecutor("pip3",
-		"./test-fixtures/requirements.txt", output,
+		"./test-fixtures/example/requirements.txt", output,
 		[]string{})
 	err := pip.Execute(context.TODO())
 

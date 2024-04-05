@@ -79,13 +79,30 @@ func (a *Archiver) ArchiveFile(in string, out string) error {
 	return nil
 }
 
-func (a *Archiver) ArchiveDir(dir string, root string) error {
+func (a *Archiver) ArchiveDir(dir string, root string, excludeGlobs []string) error {
+	excludes := make(map[string]interface{})
+	for _, excludeGlob := range excludeGlobs {
+		matches, err := filepath.Glob(filepath.Join(dir, excludeGlob))
+		if err != nil {
+			return fmt.Errorf("invalid exclude format=%s: %v", excludeGlob, err)
+		}
+
+		for _, match := range matches {
+			excludes[match] = true
+		}
+	}
+
 	return filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("error encountered walking dir=%s: %v", dir, err)
 		}
 
 		if d.IsDir() {
+			return nil
+		}
+
+		_, ok := excludes[path]
+		if ok {
 			return nil
 		}
 
