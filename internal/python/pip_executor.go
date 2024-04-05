@@ -35,6 +35,7 @@ func (p PipExecutor) Execute(ctx context.Context) error {
 	if err != nil {
 		LogError(ctx, "error when running command", map[string]interface{}{
 			"command": cmd.String(),
+			"output":  string(output),
 			"error":   err,
 		})
 		return err
