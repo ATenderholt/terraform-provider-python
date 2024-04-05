@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -81,4 +82,21 @@ func CalculateDirChecksum(ctx context.Context, dir string) (string, error) {
 
 	hash := h.Sum(nil)
 	return hex.EncodeToString(hash), err
+}
+
+func Checksum(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("unable to open file=%s for checksum: %v", path, err)
+	}
+	defer f.Close()
+
+	hasher := md5.New()
+	_, err = io.Copy(hasher, f)
+	if err != nil {
+		return "", fmt.Errorf("unable to checksum file=%s: %v", path, err)
+	}
+
+	hash := hasher.Sum(nil)
+	return hex.EncodeToString(hash), nil
 }
