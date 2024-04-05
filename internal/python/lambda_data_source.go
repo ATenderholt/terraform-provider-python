@@ -2,7 +2,7 @@ package python
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -61,10 +61,42 @@ func (d *awsLambdaDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	// Read API call logic
+	// Create file
+	outputPath := data.OutputPath.ValueString()
+	a := NewArchiver(outputPath)
+	err := a.Open()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"unable to open archive",
+			fmt.Sprintf("unable to open archive '%s': %v", outputPath, err),
+		)
+		return
+	}
+	defer a.Close()
+
+	// TODO: add excludes
+	err = a.ArchiveDir(data.SourceDir.ValueString(), "", nil)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"unable to create archive",
+			fmt.Sprintf("unable to create archive '%s': %v", outputPath, err),
+		)
+		return
+	}
+	a.Close()
+
+	checksum, err := Checksum(outputPath)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"unable to checksum archive",
+			fmt.Sprintf("unable to checksum archive '%s': %v", outputPath, err),
+		)
+		return
+	}
 
 	// Example data value setting
-	data.Id = types.StringValue("example-id")
+	data.Id = data.SourceDir
+	data.OutputBase64Sha256 = types.StringValue(checksum)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

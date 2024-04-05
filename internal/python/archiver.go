@@ -22,6 +22,12 @@ func NewArchiver(outputPath string) Archiver {
 }
 
 func (a *Archiver) Open() error {
+	dir := filepath.Dir(a.outputPath)
+	err := os.MkdirAll(dir, 0755)
+	if err != nil {
+		return fmt.Errorf("unable to create dir '%s': %v", dir, err)
+	}
+
 	file, err := os.Create(a.outputPath)
 	if err != nil {
 		return fmt.Errorf("unable to create archive file: %v", err)
