@@ -48,3 +48,43 @@ func TestArchiver_FileNotFoundError(t *testing.T) {
 	err = a.ArchiveFile("example/main.py", "main.py")
 	assert.ErrorContains(t, err, "unable to archive missing file=example/main.py")
 }
+
+func TestArchiver_ArchiveDir_NoError(t *testing.T) {
+	d := os.TempDir()
+	path := filepath.Join(d, "example_archive_dir.zip")
+	t.Logf("Creating archive at %s", path)
+
+	a := python.NewArchiver(path)
+	err := a.Open()
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		a.Close()
+		checksum, err := python.Checksum(path)
+		assert.NoError(t, err)
+		assert.Equal(t, "9ca3aaba9f972d745aa835ba5326a0bc", checksum)
+	})
+
+	err = a.ArchiveDir("test-fixtures/example", "/opt/python")
+	assert.NoError(t, err)
+}
+
+func TestArchiver_ArchiveDirWithoutRoot_NoError(t *testing.T) {
+	d := os.TempDir()
+	path := filepath.Join(d, "example_archive_dir_without_root.zip")
+	t.Logf("Creating archive at %s", path)
+
+	a := python.NewArchiver(path)
+	err := a.Open()
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		a.Close()
+		checksum, err := python.Checksum(path)
+		assert.NoError(t, err)
+		assert.Equal(t, "383ecafd3769efb3ef66301806026e25", checksum)
+	})
+
+	err = a.ArchiveDir("test-fixtures/example", "")
+	assert.NoError(t, err)
+}

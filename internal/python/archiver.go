@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -76,4 +77,24 @@ func (a *Archiver) ArchiveFile(in string, out string) error {
 	}
 
 	return nil
+}
+
+func (a *Archiver) ArchiveDir(dir string, root string) error {
+	return filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return fmt.Errorf("error encountered walking dir=%s: %v", dir, err)
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		base, err := filepath.Rel(dir, path)
+		if err != nil {
+			return fmt.Errorf("unable to relativize path=%s: %v", path, err)
+		}
+
+		joined := filepath.Join(root, base)
+		return a.ArchiveFile(path, filepath.ToSlash(joined))
+	})
 }
