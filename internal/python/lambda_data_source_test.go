@@ -21,7 +21,7 @@ func TestAccAwsLambda_Basic(t *testing.T) {
 				Config: config("example_without_deps"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testFileExists("output/example_without_deps.zip"),
-					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "output_base64sha256", "5194175f5f67b6492d02d22a339baaaca0ce0d39aa38edf0c07713bd277e7b2f"),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", "5194175f5f67b6492d02d22a339baaaca0ce0d39aa38edf0c07713bd277e7b2f"),
 				),
 			},
 		},
@@ -46,7 +46,7 @@ provider "python" {
 
 data "python_aws_lambda" "test" {
   source_dir  = "test-fixtures/%s"
-  output_path = "output/%s.zip"
+  archive_path = "output/%s.zip"
 }
 `
 

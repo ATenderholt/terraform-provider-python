@@ -17,10 +17,10 @@ func NewAwsLambdaDataSource() datasource.DataSource {
 type awsLambdaDataSource struct{}
 
 type awsLambdaDataSourceModel struct {
-	Id                 types.String `tfsdk:"id"`
-	SourceDir          types.String `tfsdk:"source_dir"`
-	OutputPath         types.String `tfsdk:"output_path"`
-	OutputBase64Sha256 types.String `tfsdk:"output_base64sha256"`
+	Id                  types.String `tfsdk:"id"`
+	SourceDir           types.String `tfsdk:"source_dir"`
+	ArchivePath         types.String `tfsdk:"archive_path"`
+	ArchiveBase64Sha256 types.String `tfsdk:"archive_base64sha256"`
 }
 
 func (d *awsLambdaDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -38,14 +38,15 @@ func (d *awsLambdaDataSource) Schema(ctx context.Context, req datasource.SchemaR
 				MarkdownDescription: "Directory containing Python code, including requirements.txt to install dependencies",
 				Required:            true,
 			},
-			"output_path": schema.StringAttribute{
-				Description:         "Path for resulting ZIP file containing Python code and its dependencies",
-				MarkdownDescription: "Path for resulting ZIP file containing Python code and its dependencies",
+			"archive_path": schema.StringAttribute{
+				Description:         "Path for resulting ZIP file containing Python code",
+				MarkdownDescription: "Path for resulting ZIP file containing Python code",
 				Required:            true,
 			},
-			"output_base64sha256": schema.StringAttribute{
-				Description: "Base64 Encoded SHA256 checksum of output file",
-				Computed:    true,
+			"archive_base64sha256": schema.StringAttribute{
+				Description:         "Base64 Encoded SHA256 checksum of ZIP file containing Python code",
+				MarkdownDescription: "Base64 Encoded SHA256 checksum of ZIP file containing Python code",
+				Computed:            true,
 			},
 		},
 	}
@@ -62,13 +63,13 @@ func (d *awsLambdaDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	// Create file
-	outputPath := data.OutputPath.ValueString()
-	a := NewArchiver(outputPath)
+	archivePath := data.ArchivePath.ValueString()
+	a := NewArchiver(archivePath)
 	err := a.Open()
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"unable to open archive",
-			fmt.Sprintf("unable to open archive '%s': %v", outputPath, err),
+			fmt.Sprintf("unable to open archive '%s': %v", archivePath, err),
 		)
 		return
 	}
@@ -79,24 +80,24 @@ func (d *awsLambdaDataSource) Read(ctx context.Context, req datasource.ReadReque
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"unable to create archive",
-			fmt.Sprintf("unable to create archive '%s': %v", outputPath, err),
+			fmt.Sprintf("unable to create archive '%s': %v", archivePath, err),
 		)
 		return
 	}
 	a.Close()
 
-	checksum, err := Checksum(outputPath)
+	checksum, err := Checksum(archivePath)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"unable to checksum archive",
-			fmt.Sprintf("unable to checksum archive '%s': %v", outputPath, err),
+			fmt.Sprintf("unable to checksum archive '%s': %v", archivePath, err),
 		)
 		return
 	}
 
 	// Example data value setting
 	data.Id = data.SourceDir
-	data.OutputBase64Sha256 = types.StringValue(checksum)
+	data.ArchiveBase64Sha256 = types.StringValue(checksum)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
