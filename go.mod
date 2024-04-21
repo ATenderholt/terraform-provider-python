@@ -1,4 +1,4 @@
-module github.com/ATenderholt/terraform-provider-python-package
+module github.com/ATenderholt/terraform-provider-python
 
 go 1.21.0
 
