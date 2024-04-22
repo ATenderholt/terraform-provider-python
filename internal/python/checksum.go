@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/md5"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -99,5 +100,5 @@ func Checksum(path string) (string, error) {
 	}
 
 	hash := hasher.Sum(nil)
-	return hex.EncodeToString(hash), nil
+	return base64.StdEncoding.EncodeToString(hash), nil
 }

@@ -1,7 +1,7 @@
 package python_test
 
 import (
-	"github.com/ATenderholt/terraform-provider-python-package/internal/python"
+	"github.com/ATenderholt/terraform-provider-python/internal/python"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )

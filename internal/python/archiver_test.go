@@ -1,7 +1,7 @@
 package python_test
 
 import (
-	"github.com/ATenderholt/terraform-provider-python-package/internal/python"
+	"github.com/ATenderholt/terraform-provider-python/internal/python"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -22,7 +22,7 @@ func TestArchiver_ArchiveFile_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "25f5b1285bfd311007904cb3e0bd3dff8e94c098b8e2fc593deb84c13b9bd74d", checksum)
+		assert.Equal(t, "sP8C+nqT8APB7XoK49rWyYezKA+VKUVU4rGum0WxcQY=", checksum)
 	})
 
 	err = a.ArchiveFile("test-fixtures/example/main.py", "main.py")
@@ -62,7 +62,7 @@ func TestArchiver_ArchiveDir_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "103010b1ccdbbb18a97003678016243f00cd4b951c286b4a6a4c22a974ceda36", checksum)
+		assert.Equal(t, "mXDSpyuc5PJwKzQ3NfwfNfWIpIoo7l7kZa6JTZmXR+k=", checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "/opt/python", []string{"requirements.txt"})
@@ -82,7 +82,7 @@ func TestArchiver_ArchiveDir_WithoutRoot_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "657dcb67ba391c894ca08ac2db11b8040ded43422c825d413b233885c69fe203", checksum)
+		assert.Equal(t, "G99BHkVKpQzS5ica7MToKLXlch8IDdRj7we2pVbMGwg=", checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "", nil)
@@ -102,7 +102,7 @@ func TestArchiver_ArchiveDir_WithoutRootExcludePy_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "eb3eec77b422f3923ec18b6bb6e281fbed24ddba15e08d8d367dd50f442037ca", checksum)
+		assert.Equal(t, "6z7sd7Qi85I+wYtrtuKB++0k3boV4I2NNn3VD0QgN8o=", checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "", []string{"*.py", "**/*.py"})

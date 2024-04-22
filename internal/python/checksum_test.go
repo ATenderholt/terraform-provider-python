@@ -2,7 +2,7 @@ package python_test
 
 import (
 	"context"
-	"github.com/ATenderholt/terraform-provider-python-package/internal/python"
+	"github.com/ATenderholt/terraform-provider-python/internal/python"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
