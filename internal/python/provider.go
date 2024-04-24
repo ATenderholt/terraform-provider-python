@@ -43,8 +43,8 @@ func (p *pythonPackageProvider) Schema(ctx context.Context, req provider.SchemaR
 				Validators:          nil,
 			},
 		},
-		Description:         "Package Python & dependencies into single archive",
-		MarkdownDescription: "Package Python & dependencies into single archive",
+		Description:         "Package Python & dependencies into archives suitable for Cloud serverless",
+		MarkdownDescription: "Package Python & dependencies into archives suitable for Cloud serverless",
 	}
 }
 

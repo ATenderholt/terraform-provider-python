@@ -17,10 +17,12 @@ func NewAwsLambdaDataSource() datasource.DataSource {
 type awsLambdaDataSource struct{}
 
 type awsLambdaDataSourceModel struct {
-	Id                  types.String `tfsdk:"id"`
-	SourceDir           types.String `tfsdk:"source_dir"`
-	ArchivePath         types.String `tfsdk:"archive_path"`
-	ArchiveBase64Sha256 types.String `tfsdk:"archive_base64sha256"`
+	Id                       types.String `tfsdk:"id"`
+	SourceDir                types.String `tfsdk:"source_dir"`
+	ArchivePath              types.String `tfsdk:"archive_path"`
+	ArchiveBase64Sha256      types.String `tfsdk:"archive_base64sha256"`
+	DependenciesPath         types.String `tfsdk:"dependencies_path"`
+	DependenciesBase64Sha256 types.String `tfsdk:"dependencies_base64sha256"`
 }
 
 func (d *awsLambdaDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -46,6 +48,16 @@ func (d *awsLambdaDataSource) Schema(ctx context.Context, req datasource.SchemaR
 			"archive_base64sha256": schema.StringAttribute{
 				Description:         "Base64 Encoded SHA256 checksum of ZIP file containing Python code",
 				MarkdownDescription: "Base64 Encoded SHA256 checksum of ZIP file containing Python code",
+				Computed:            true,
+			},
+			"dependencies_path": schema.StringAttribute{
+				Description:         "Path for resulting ZIP file containing dependencies",
+				MarkdownDescription: "Path for resulting ZIP file containing dependencies",
+				Optional:            true,
+			},
+			"dependencies_base64sha256": schema.StringAttribute{
+				Description:         "Base64 Encoded SHA256 checksum of ZIP file containing dependencies",
+				MarkdownDescription: "Base64 Encoded SHA256 checksum of ZIP file containing dependencies",
 				Computed:            true,
 			},
 		},
