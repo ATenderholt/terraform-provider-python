@@ -23,3 +23,14 @@ func TestPipExecutor_Execute(t *testing.T) {
 	assert.FileExists(t, filepath.Join(output, "dataclasses_avroschema", "__init__.py"))
 	assert.FileExists(t, filepath.Join(output, "fastavro", "__init__.py"))
 }
+
+func TestPipExecutor_GetPythonVersion(t *testing.T) {
+	pip := python.NewPipExecutor("pip3.10",
+		"./test-fixtures/example/requirements.txt", "",
+		[]string{})
+
+	version, err := pip.GetPythonVersion(context.TODO())
+
+	assert.NoError(t, err, "unexpected error when getting python version")
+	assert.Equal(t, "3.10", version)
+}

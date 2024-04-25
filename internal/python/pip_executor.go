@@ -2,7 +2,9 @@ package python
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
+	"regexp"
 )
 
 type PipExecutor struct {
@@ -47,4 +49,32 @@ func (p PipExecutor) Execute(ctx context.Context) error {
 	})
 
 	return nil
+}
+
+func (p PipExecutor) GetPythonVersion(ctx context.Context) (string, error) {
+	cmd := exec.CommandContext(ctx, p.command, "--version")
+
+	out, err := cmd.CombinedOutput()
+	output := string(out)
+	if err != nil {
+		LogError(ctx, "error when running command", map[string]interface{}{
+			"command": cmd.String(),
+			"output":  output,
+			"error":   err,
+		})
+		return "", err
+	}
+
+	LogDebug(ctx, "output from running command", map[string]interface{}{
+		"command": cmd.String(),
+		"output":  output,
+	})
+
+	re := regexp.MustCompile("\\(python (.*)\\)")
+	matches := re.FindStringSubmatch(output)
+	if len(matches) != 2 {
+		return "", fmt.Errorf("unable to find python version from pip: %s", output)
+	}
+
+	return matches[1], nil
 }
