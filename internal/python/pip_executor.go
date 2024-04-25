@@ -9,33 +9,27 @@ import (
 )
 
 type PipExecutor struct {
-	command      string
-	requirements string
-	installPath  string
-	extraFlags   []string
+	command string
 }
 
-func NewPipExecutor(command string, requirements string, installPath string, extraFlags []string) PipExecutor {
+func NewPipExecutor(command string) PipExecutor {
 	return PipExecutor{
-		command:      command,
-		requirements: requirements,
-		installPath:  installPath,
-		extraFlags:   extraFlags,
+		command: command,
 	}
 }
 
-func (p PipExecutor) Execute(ctx context.Context) error {
-	err := os.RemoveAll(p.installPath)
+func (p PipExecutor) Install(ctx context.Context, requirements string, path string) error {
+	err := os.RemoveAll(path)
 	if err != nil {
 		LogError(ctx, "unable to cleanup directory", map[string]interface{}{
-			"installPath": p.installPath,
+			"installPath": path,
 		})
 	}
 
 	cmd := exec.CommandContext(ctx,
 		p.command,
-		"install", "-r", p.requirements,
-		"-t", p.installPath)
+		"install", "-r", requirements,
+		"-t", path)
 
 	LogDebug(ctx, "Executing command", map[string]interface{}{
 		"command": cmd.String(),

@@ -9,15 +9,13 @@ import (
 	"testing"
 )
 
-func TestPipExecutor_Execute(t *testing.T) {
+func TestPipExecutor_Install(t *testing.T) {
 	td := os.TempDir()
 	output := filepath.Join(td, "pip_output")
 	t.Logf("Using pip to install to %s", output)
 
-	pip := python.NewPipExecutor("pip3",
-		"./test-fixtures/example/requirements.txt", output,
-		[]string{})
-	err := pip.Execute(context.TODO())
+	pip := python.NewPipExecutor("pip3")
+	err := pip.Install(context.TODO(), "./test-fixtures/example/requirements.txt", output)
 
 	assert.NoError(t, err, "unexpected error when running pip")
 	assert.FileExists(t, filepath.Join(output, "dataclasses_avroschema", "__init__.py"))
@@ -25,10 +23,7 @@ func TestPipExecutor_Execute(t *testing.T) {
 }
 
 func TestPipExecutor_GetPythonVersion(t *testing.T) {
-	pip := python.NewPipExecutor("pip3.10",
-		"./test-fixtures/example/requirements.txt", "",
-		[]string{})
-
+	pip := python.NewPipExecutor("pip3.10")
 	version, err := pip.GetPythonVersion(context.TODO())
 
 	assert.NoError(t, err, "unexpected error when getting python version")
