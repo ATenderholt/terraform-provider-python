@@ -3,6 +3,7 @@ package python
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 )
@@ -24,6 +25,13 @@ func NewPipExecutor(command string, requirements string, installPath string, ext
 }
 
 func (p PipExecutor) Execute(ctx context.Context) error {
+	err := os.RemoveAll(p.installPath)
+	if err != nil {
+		LogError(ctx, "unable to cleanup directory", map[string]interface{}{
+			"installPath": p.installPath,
+		})
+	}
+
 	cmd := exec.CommandContext(ctx,
 		p.command,
 		"install", "-r", p.requirements,
