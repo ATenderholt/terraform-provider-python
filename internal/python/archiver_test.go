@@ -82,7 +82,7 @@ func TestArchiver_ArchiveDir_WithoutRoot_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "G99BHkVKpQzS5ica7MToKLXlch8IDdRj7we2pVbMGwg=", checksum)
+		assert.Equal(t, "oprDdSBQR1b+1OPZj1qOy947VvgafPoN3LPd7N/7Hes=", checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "", nil)
@@ -102,7 +102,7 @@ func TestArchiver_ArchiveDir_WithoutRootExcludePy_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "6z7sd7Qi85I+wYtrtuKB++0k3boV4I2NNn3VD0QgN8o=", checksum)
+		assert.Equal(t, "y0JkOxDUL7jStmRmmc1Tl4vbuy6bW9VDMis/CxA7V7o=", checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "", []string{"*.py", "**/*.py"})

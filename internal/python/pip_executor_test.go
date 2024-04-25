@@ -18,8 +18,8 @@ func TestPipExecutor_Install(t *testing.T) {
 	err := pip.Install(context.TODO(), "./test-fixtures/example/requirements.txt", output)
 
 	assert.NoError(t, err, "unexpected error when running pip")
-	assert.FileExists(t, filepath.Join(output, "dataclasses_avroschema", "__init__.py"))
-	assert.FileExists(t, filepath.Join(output, "fastavro", "__init__.py"))
+	assert.FileExists(t, filepath.Join(output, "requests", "__init__.py"))
+	assert.FileExists(t, filepath.Join(output, "urllib3", "__init__.py"))
 }
 
 func TestPipExecutor_GetPythonVersion(t *testing.T) {
