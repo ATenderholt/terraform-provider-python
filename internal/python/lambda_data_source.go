@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"os"
+	"path/filepath"
 )
 
 var _ datasource.DataSource = (*awsLambdaDataSource)(nil)
@@ -14,7 +17,9 @@ func NewAwsLambdaDataSource() datasource.DataSource {
 	return &awsLambdaDataSource{}
 }
 
-type awsLambdaDataSource struct{}
+type awsLambdaDataSource struct {
+	pipExecutor PipExecutor
+}
 
 type awsLambdaDataSourceModel struct {
 	Id                       types.String `tfsdk:"id"`
@@ -23,6 +28,21 @@ type awsLambdaDataSourceModel struct {
 	ArchiveBase64Sha256      types.String `tfsdk:"archive_base64sha256"`
 	DependenciesPath         types.String `tfsdk:"dependencies_path"`
 	DependenciesBase64Sha256 types.String `tfsdk:"dependencies_base64sha256"`
+}
+
+func (d *awsLambdaDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	model, ok := req.ProviderData.(pythonPackageProviderModel)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected DataSource Configure Type",
+			fmt.Sprintf("Expected pythonPackageProviderModel, but got %T", req.ProviderData))
+		return
+	}
+
+	d.pipExecutor = NewPipExecutor(model.PipCommand.ValueString())
 }
 
 func (d *awsLambdaDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -113,4 +133,20 @@ func (d *awsLambdaDataSource) Read(ctx context.Context, req datasource.ReadReque
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (d *awsLambdaDataSource) handleDependencies(ctx context.Context, data awsLambdaDataSourceModel) error {
+	sourceDir := data.SourceDir.ValueString()
+	reqPath := filepath.Join(sourceDir, "requirements.txt")
+	_, err := os.Stat(reqPath)
+	if os.IsNotExist(err) {
+		tflog.Debug(ctx, "No requirements.txt found in sourceDir, skipping running pip", map[string]interface{}{
+			"sourceDir": sourceDir,
+		})
+		return nil
+	}
+
+	tempDir := os.TempDir()
+	d.pipExecutor.Install(ctx, reqPath, nil)
+	return nil
 }

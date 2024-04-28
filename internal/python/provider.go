@@ -56,6 +56,7 @@ func (p *pythonPackageProvider) Configure(ctx context.Context, req provider.Conf
 		return
 	}
 
+	resp.ResourceData = config
 	resp.DataSourceData = config
 }
 
