@@ -66,7 +66,7 @@ func TestAccAwsLambda_WithDependencies(t *testing.T) {
 					testFileExists("output/example.zip"),
 					testFileExists("output/example_deps.zip"),
 					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", hexToBase64("a29ac37520504756fed4e3d98f5a8ecbde3b56f81a7cfa0ddcb3ddecdffb1deb")),
-					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", hexToBase64("e034cf819770df6726d6febd35fa8b1d30d892502327eea8cec20a58eaf8dcab")),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", hexToBase64("5dee751ef83228317c11fb117da904c3557521fc2ea5e163cad6135a85fdb957")),
 				),
 			},
 		},

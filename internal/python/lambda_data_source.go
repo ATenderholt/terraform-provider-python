@@ -212,7 +212,7 @@ func (d *awsLambdaDataSource) packageDependencies(ctx context.Context, data awsL
 	defer a.Close()
 
 	root := filepath.Join("/python", "lib", "python"+version, "site-packages")
-	err = a.ArchiveDir(installPath, root, []string{"**/__pycache__"})
+	err = a.ArchiveDir(installPath, root, []string{"*.pyc", "**/*.pyc"})
 	if err != nil {
 		tflog.Error(ctx, "unable to archive python dependencies", map[string]interface{}{
 			"dependenciesPath": archivePath,

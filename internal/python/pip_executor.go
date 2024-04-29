@@ -29,7 +29,8 @@ func (p PipExecutor) Install(ctx context.Context, requirements string, path stri
 	cmd := exec.CommandContext(ctx,
 		p.command,
 		"install", "-r", requirements,
-		"-t", path)
+		"-t", path,
+		"--no-compile")
 
 	LogDebug(ctx, "Executing command", map[string]interface{}{
 		"command": cmd.String(),
