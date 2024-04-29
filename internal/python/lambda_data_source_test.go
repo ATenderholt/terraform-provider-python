@@ -31,7 +31,8 @@ func TestAccAwsLambda_Basic(t *testing.T) {
 				Config: basicExample,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testFileExists("output/example_without_deps.zip"),
-					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", "sX8w3367kZUgdBbFFW0i0LQ/2zJ9QuVvm7TokKa2vto="),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", hexToBase64("bef7f0ecaa3caa9168df5c4845da02e9d16a033875b92c3bb64cd78a1afc3448")),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", ""),
 				),
 			},
 		},
@@ -65,8 +66,8 @@ func TestAccAwsLambda_WithDependencies(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testFileExists("output/example.zip"),
 					testFileExists("output/example_deps.zip"),
-					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", hexToBase64("a29ac37520504756fed4e3d98f5a8ecbde3b56f81a7cfa0ddcb3ddecdffb1deb")),
-					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", hexToBase64("5dee751ef83228317c11fb117da904c3557521fc2ea5e163cad6135a85fdb957")),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", hexToBase64("842611c6d40cc437abda689b68204416172152e5b70072d7a681e510ca08f40f")),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", hexToBase64("2a4ba9a6524ed60b9aa69fdb49b300030e4cee0d45474d86100b0a6551bf9571")),
 				),
 			},
 		},

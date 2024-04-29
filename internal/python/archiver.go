@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type Archiver struct {
@@ -71,6 +72,8 @@ func (a *Archiver) ArchiveFile(in string, out string) error {
 	}
 	fh.Name = filepath.ToSlash(out)
 	fh.Method = zip.Deflate
+	// Need to provide a fixed date so the zip checksum doesn't change
+	fh.Modified = time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
 
 	f, err := a.writer.CreateHeader(fh)
 	if err != nil {

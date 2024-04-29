@@ -22,7 +22,7 @@ func TestArchiver_ArchiveFile_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "sP8C+nqT8APB7XoK49rWyYezKA+VKUVU4rGum0WxcQY=", checksum)
+		assert.Equal(t, hexToBase64("5af38573cd4dd654a61731be4a9d19826b3335577d5e9a0c96bdf39e7b65ae58"), checksum)
 	})
 
 	err = a.ArchiveFile("test-fixtures/example/main.py", "main.py")
@@ -62,7 +62,7 @@ func TestArchiver_ArchiveDir_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "mXDSpyuc5PJwKzQ3NfwfNfWIpIoo7l7kZa6JTZmXR+k=", checksum)
+		assert.Equal(t, hexToBase64("914fb57b71e661695db1b35a89a158a8a51e4e723033c493179a1355e55efbca"), checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "/opt/python", []string{"requirements.txt"})
@@ -82,7 +82,7 @@ func TestArchiver_ArchiveDir_WithoutRoot_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "oprDdSBQR1b+1OPZj1qOy947VvgafPoN3LPd7N/7Hes=", checksum)
+		assert.Equal(t, hexToBase64("842611c6d40cc437abda689b68204416172152e5b70072d7a681e510ca08f40f"), checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "", nil)
@@ -102,7 +102,7 @@ func TestArchiver_ArchiveDir_WithoutRootExcludePy_NoError(t *testing.T) {
 		a.Close()
 		checksum, err := python.Checksum(path)
 		assert.NoError(t, err)
-		assert.Equal(t, "y0JkOxDUL7jStmRmmc1Tl4vbuy6bW9VDMis/CxA7V7o=", checksum)
+		assert.Equal(t, hexToBase64("11100ecdbc7f1b563e806c9c1bee7448d7b021b17509763bca284e03f75264f0"), checksum)
 	})
 
 	err = a.ArchiveDir("test-fixtures/example", "", []string{"*.py", "**/*.py"})
