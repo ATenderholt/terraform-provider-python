@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var _ datasource.DataSource = (*awsLambdaDataSource)(nil)
@@ -127,15 +128,38 @@ func (d *awsLambdaDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
+	depPath, err := d.installDependencies(ctx, data)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"unable to install dependencies",
+			fmt.Sprintf("unable to install dependencies: %v", err),
+		)
+		return
+	}
+
+	var depChecksum string
+	if depPath != "" {
+		depChecksum, err = d.packageDependencies(ctx, data, depPath)
+	}
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"unable to package dependencies",
+			fmt.Sprintf("unable to package dependencies: %v", err),
+		)
+		return
+	}
+
 	// Example data value setting
 	data.Id = data.SourceDir
 	data.ArchiveBase64Sha256 = types.StringValue(checksum)
+	data.DependenciesBase64Sha256 = types.StringValue(depChecksum)
 
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (d *awsLambdaDataSource) handleDependencies(ctx context.Context, data awsLambdaDataSourceModel) error {
+func (d *awsLambdaDataSource) installDependencies(ctx context.Context, data awsLambdaDataSourceModel) (string, error) {
 	sourceDir := data.SourceDir.ValueString()
 	reqPath := filepath.Join(sourceDir, "requirements.txt")
 	_, err := os.Stat(reqPath)
@@ -143,10 +167,69 @@ func (d *awsLambdaDataSource) handleDependencies(ctx context.Context, data awsLa
 		tflog.Debug(ctx, "No requirements.txt found in sourceDir, skipping running pip", map[string]interface{}{
 			"sourceDir": sourceDir,
 		})
-		return nil
+		return "", nil
 	}
 
 	tempDir := os.TempDir()
-	d.pipExecutor.Install(ctx, reqPath, nil)
-	return nil
+	now := time.Now()
+	installPath := filepath.Join(tempDir, "terraform", now.Format("20060102-150405.00000"))
+	tflog.Debug(ctx, "installing python dependencies", map[string]interface{}{
+		"sourceDir":   sourceDir,
+		"installPath": installPath,
+	})
+
+	err = d.pipExecutor.Install(ctx, reqPath, installPath)
+	if err != nil {
+		tflog.Error(ctx, "unable to install dependencies via pip", map[string]interface{}{
+			"sourceDir": sourceDir,
+			"error":     err,
+		})
+		return "", fmt.Errorf("unable to install dependencies via pip: %w", err)
+	}
+
+	return installPath, nil
+}
+
+func (d *awsLambdaDataSource) packageDependencies(ctx context.Context, data awsLambdaDataSourceModel, installPath string) (string, error) {
+	version, err := d.pipExecutor.GetPythonVersion(ctx)
+	if err != nil {
+		tflog.Error(ctx, "unable to determine python version from pip", map[string]interface{}{
+			"error": err,
+		})
+		return "", fmt.Errorf("unable to determine python version from pip: %w", err)
+	}
+
+	archivePath := data.DependenciesPath.ValueString()
+	a := NewArchiver(archivePath)
+	err = a.Open()
+	if err != nil {
+		tflog.Error(ctx, "unable to open archiver for dependencies", map[string]interface{}{
+			"dependenciesPath": archivePath,
+			"error":            err,
+		})
+		return "", fmt.Errorf("unable open archiver for dependencies: %w", err)
+	}
+	defer a.Close()
+
+	root := filepath.Join("/python", "lib", "python"+version, "site-packages")
+	err = a.ArchiveDir(installPath, root, []string{"**/__pycache__"})
+	if err != nil {
+		tflog.Error(ctx, "unable to archive python dependencies", map[string]interface{}{
+			"dependenciesPath": archivePath,
+			"error":            err,
+		})
+		return "", fmt.Errorf("unable to archive python dependencies: %w", err)
+	}
+	a.Close()
+
+	checksum, err := Checksum(archivePath)
+	if err != nil {
+		tflog.Error(ctx, "unable to checksum python dependencies", map[string]interface{}{
+			"dependenciesPath": archivePath,
+			"error":            err,
+		})
+		return "", fmt.Errorf("unable to checksum python dependencies: %w", err)
+	}
+
+	return checksum, nil
 }
