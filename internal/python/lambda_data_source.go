@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -29,6 +30,7 @@ type awsLambdaDataSourceModel struct {
 	ArchiveBase64Sha256      types.String `tfsdk:"archive_base64sha256"`
 	DependenciesPath         types.String `tfsdk:"dependencies_path"`
 	DependenciesBase64Sha256 types.String `tfsdk:"dependencies_base64sha256"`
+	ExtraArgs                types.String `tfsdk:"extra_args"`
 }
 
 func (d *awsLambdaDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -80,6 +82,11 @@ func (d *awsLambdaDataSource) Schema(ctx context.Context, req datasource.SchemaR
 				Description:         "Base64 Encoded SHA256 checksum of ZIP file containing dependencies",
 				MarkdownDescription: "Base64 Encoded SHA256 checksum of ZIP file containing dependencies",
 				Computed:            true,
+			},
+			"extra_args": schema.StringAttribute{
+				Description:         "Additional arguments for pip install",
+				MarkdownDescription: "Additional arguments for `pip install`",
+				Optional:            true,
 			},
 		},
 	}
@@ -178,7 +185,12 @@ func (d *awsLambdaDataSource) installDependencies(ctx context.Context, data awsL
 		"installPath": installPath,
 	})
 
-	err = d.pipExecutor.Install(ctx, reqPath, installPath)
+	var extraArgs []string
+	if !data.ExtraArgs.IsNull() {
+		extraArgs = strings.Split(data.ExtraArgs.ValueString(), " ")
+	}
+
+	err = d.pipExecutor.Install(ctx, reqPath, installPath, extraArgs...)
 	if err != nil {
 		tflog.Error(ctx, "unable to install dependencies via pip", map[string]interface{}{
 			"sourceDir": sourceDir,

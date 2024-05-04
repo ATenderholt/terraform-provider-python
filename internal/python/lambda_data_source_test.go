@@ -40,7 +40,7 @@ func TestAccAwsLambda_Basic(t *testing.T) {
 	})
 }
 
-const example = `
+const exampleNoExtraArgs = `
 provider "python" {
   pip_command = "pip3.11"
 }
@@ -52,7 +52,7 @@ data "python_aws_lambda" "test" {
 }
 `
 
-func TestAccAwsLambda_WithDependencies(t *testing.T) {
+func TestAccAwsLambda_WithDependencies_NoExtraArgs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		IsUnitTest:                false,
 		PreCheck:                  nil,
@@ -62,12 +62,48 @@ func TestAccAwsLambda_WithDependencies(t *testing.T) {
 		ErrorCheck:                nil,
 		Steps: []resource.TestStep{
 			{
-				Config: example,
+				Config: exampleNoExtraArgs,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testFileExists("output/example.zip"),
 					testFileExists("output/example_deps.zip"),
-					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", hexToBase64("842611c6d40cc437abda689b68204416172152e5b70072d7a681e510ca08f40f")),
-					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", hexToBase64("2a4ba9a6524ed60b9aa69fdb49b300030e4cee0d45474d86100b0a6551bf9571")),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", hexToBase64("bb75ac39bdf74b70cc6f8770a9077598e95bf2caf44d96dca70f250759a6b160")),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", hexToBase64("33c8a87069446f87db42525345ae848a5cdd957942935e5e57f2b3251880536c")),
+				),
+			},
+		},
+		WorkingDir: "",
+	})
+}
+
+const exampleExtraArgs = `
+provider "python" {
+  pip_command = "pip3.11"
+}
+
+data "python_aws_lambda" "test" {
+  source_dir        = "test-fixtures/example"
+  archive_path      = "output/example.zip"
+  dependencies_path = "output/example_deps_extra_args.zip"
+  extra_args        = "--platform=manylinux_2_17_i686 --only-binary=:all:"
+}
+`
+
+func TestAccAwsLambda_WithDependencies_ExtraArgs(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		IsUnitTest:                false,
+		PreCheck:                  nil,
+		ProtoV6ProviderFactories:  protoV6ProviderFactories(),
+		PreventPostDestroyRefresh: false,
+		CheckDestroy:              nil,
+		ErrorCheck:                nil,
+		Steps: []resource.TestStep{
+			{
+				Config: exampleExtraArgs,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testFileExists("output/example.zip"),
+					testFileExists("output/example_deps_extra_args.zip"),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "archive_base64sha256", hexToBase64("bb75ac39bdf74b70cc6f8770a9077598e95bf2caf44d96dca70f250759a6b160")),
+					resource.TestCheckResourceAttr("data.python_aws_lambda.test", "dependencies_base64sha256", hexToBase64("9e55e018464f2d93dfa85b2ff0daa85346b47137b346837d1c2e8ce8e5c49cca")),
 				),
 			},
 		},

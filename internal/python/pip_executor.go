@@ -18,7 +18,7 @@ func NewPipExecutor(command string) PipExecutor {
 	}
 }
 
-func (p PipExecutor) Install(ctx context.Context, requirements string, path string) error {
+func (p PipExecutor) Install(ctx context.Context, requirements string, path string, extraArgs ...string) error {
 	err := os.RemoveAll(path)
 	if err != nil {
 		LogError(ctx, "unable to cleanup directory", map[string]interface{}{
@@ -26,11 +26,11 @@ func (p PipExecutor) Install(ctx context.Context, requirements string, path stri
 		})
 	}
 
+	args := []string{"install", "-r", requirements, "-t", path, "--no-compile"}
+	args = append(args, extraArgs...)
 	cmd := exec.CommandContext(ctx,
 		p.command,
-		"install", "-r", requirements,
-		"-t", path,
-		"--no-compile")
+		args...)
 
 	LogDebug(ctx, "Executing command", map[string]interface{}{
 		"command": cmd.String(),
