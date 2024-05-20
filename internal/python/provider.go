@@ -35,13 +35,6 @@ func (p *pythonPackageProvider) Schema(ctx context.Context, req provider.SchemaR
 				MarkdownDescription: "Executable on path to install dependencies (e.g. pip3.10)",
 				Validators:          nil,
 			},
-			"pip_extra_flags": schema.StringAttribute{
-				Required:            false,
-				Optional:            true,
-				Description:         "Extra flags to pass to pip when installing dependencies",
-				MarkdownDescription: "Extra flags to pass to pip when installing dependencies",
-				Validators:          nil,
-			},
 		},
 		Description:         "Package Python & dependencies into archives suitable for Cloud serverless",
 		MarkdownDescription: "Package Python & dependencies into archives suitable for Cloud serverless",
