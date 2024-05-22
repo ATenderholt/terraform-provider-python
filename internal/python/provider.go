@@ -10,22 +10,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
-var _ provider.Provider = (*pythonPackageProvider)(nil)
+var _ provider.Provider = (*pythonProvider)(nil)
 
 func New() func() provider.Provider {
 	return func() provider.Provider {
-		return &pythonPackageProvider{}
+		return &pythonProvider{}
 	}
 }
 
-type pythonPackageProvider struct{}
+type pythonProvider struct{}
 
-type pythonPackageProviderModel struct {
-	PipCommand    types.String `tfsdk:"pip_command"`
-	PipExtraFlags types.String `tfsdk:"pip_extra_flags"`
+type pythonProviderModel struct {
+	PipCommand types.String `tfsdk:"pip_command"`
 }
 
-func (p *pythonPackageProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *pythonProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"pip_command": schema.StringAttribute{
@@ -41,8 +40,8 @@ func (p *pythonPackageProvider) Schema(ctx context.Context, req provider.SchemaR
 	}
 }
 
-func (p *pythonPackageProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var config pythonPackageProviderModel
+func (p *pythonProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var config pythonProviderModel
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -53,16 +52,16 @@ func (p *pythonPackageProvider) Configure(ctx context.Context, req provider.Conf
 	resp.DataSourceData = config
 }
 
-func (p *pythonPackageProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *pythonProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "python"
 }
 
-func (p *pythonPackageProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *pythonProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewAwsLambdaDataSource,
 	}
 }
 
-func (p *pythonPackageProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *pythonProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{}
 }

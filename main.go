@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "github.com/ATenderholt/python_package",
+		Address: "github.com/ATenderholt/python",
 		Debug:   debug,
 	}
 

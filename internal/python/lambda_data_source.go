@@ -38,7 +38,7 @@ func (d *awsLambdaDataSource) Configure(ctx context.Context, req datasource.Conf
 		return
 	}
 
-	model, ok := req.ProviderData.(pythonPackageProviderModel)
+	model, ok := req.ProviderData.(pythonProviderModel)
 	if !ok {
 		resp.Diagnostics.AddError("Unexpected DataSource Configure Type",
 			fmt.Sprintf("Expected pythonPackageProviderModel, but got %T", req.ProviderData))
