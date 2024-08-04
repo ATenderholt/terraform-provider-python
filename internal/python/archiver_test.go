@@ -108,3 +108,23 @@ func TestArchiver_ArchiveDir_WithoutRootExcludePy_NoError(t *testing.T) {
 	err = a.ArchiveDir("test-fixtures/example", "", []string{"*.py", "**/*.py"})
 	assert.NoError(t, err)
 }
+
+func TestArchiver_ArchiveDir_Dependencies(t *testing.T) {
+	d := os.TempDir()
+	path := filepath.Join(d, "dependencies.zip")
+	t.Logf("Creating archive at %s", path)
+
+	a := python.NewArchiver(path)
+	err := a.Open()
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		a.Close()
+		checksum, err := python.Checksum(path)
+		assert.NoError(t, err)
+		assert.Equal(t, hexToBase64("b9821c8a4c47aef9554c6299c87f973e4707f6616b8d76fe093d3436f6cb5d3d"), checksum)
+	})
+
+	err = a.ArchiveDir("test-fixtures/dependencies", "", []string{"*.pyc", "**/*.pyc", "bin", "*dist-info"})
+	assert.NoError(t, err)
+}

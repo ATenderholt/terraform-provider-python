@@ -106,12 +106,17 @@ func (a *Archiver) ArchiveDir(dir string, root string, excludeGlobs []string) er
 			return fmt.Errorf("error encountered walking dir=%s: %v", dir, err)
 		}
 
-		if d.IsDir() {
+		// If current path is a directory and matches the exclude glob, we should NOT continue walking
+		// If current path is a directory and doesn't match the exclude glob, we should continue walking
+		// If current path is NOT a directory and matches the exclude glob, we should continue walking
+		// otherwise, add the current path to the archive.
+		_, exclude := excludes[path]
+		switch {
+		case d.IsDir() && exclude:
+			return filepath.SkipDir
+		case d.IsDir() && !exclude:
 			return nil
-		}
-
-		_, ok := excludes[path]
-		if ok {
+		case !d.IsDir() && exclude:
 			return nil
 		}
 
