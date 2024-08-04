@@ -224,7 +224,12 @@ func (d *awsLambdaDataSource) packageDependencies(ctx context.Context, data awsL
 	defer a.Close()
 
 	root := filepath.Join("/python", "lib", "python"+version, "site-packages")
-	err = a.ArchiveDir(installPath, root, []string{"*.pyc", "**/*.pyc"})
+	excludes := []string{"*.pyc", "**/*.pyc", "bin", "*dist-info"}
+	tflog.Debug(ctx, "archiving dependencies", map[string]interface{}{
+		"root":     root,
+		"excludes": excludes,
+	})
+	err = a.ArchiveDir(installPath, root, excludes)
 	if err != nil {
 		tflog.Error(ctx, "unable to archive python dependencies", map[string]interface{}{
 			"dependenciesPath": archivePath,
