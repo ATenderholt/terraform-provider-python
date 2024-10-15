@@ -203,17 +203,9 @@ func (d *awsLambdaDataSource) installDependencies(ctx context.Context, data awsL
 }
 
 func (d *awsLambdaDataSource) packageDependencies(ctx context.Context, data awsLambdaDataSourceModel, installPath string) (string, error) {
-	version, err := d.pipExecutor.GetPythonVersion(ctx)
-	if err != nil {
-		tflog.Error(ctx, "unable to determine python version from pip", map[string]interface{}{
-			"error": err,
-		})
-		return "", fmt.Errorf("unable to determine python version from pip: %w", err)
-	}
-
 	archivePath := data.DependenciesPath.ValueString()
 	a := NewArchiver(archivePath)
-	err = a.Open()
+	err := a.Open()
 	if err != nil {
 		tflog.Error(ctx, "unable to open archiver for dependencies", map[string]interface{}{
 			"dependenciesPath": archivePath,
@@ -223,13 +215,12 @@ func (d *awsLambdaDataSource) packageDependencies(ctx context.Context, data awsL
 	}
 	defer a.Close()
 
-	root := filepath.Join("/python", "lib", "python"+version, "site-packages")
 	excludes := []string{"*.pyc", "**/*.pyc", "bin", "*dist-info"}
 	tflog.Debug(ctx, "archiving dependencies", map[string]interface{}{
-		"root":     root,
+		"root":     "/python",
 		"excludes": excludes,
 	})
-	err = a.ArchiveDir(installPath, root, excludes)
+	err = a.ArchiveDir(installPath, "/python", excludes)
 	if err != nil {
 		tflog.Error(ctx, "unable to archive python dependencies", map[string]interface{}{
 			"dependenciesPath": archivePath,
